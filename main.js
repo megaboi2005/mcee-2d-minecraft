@@ -1,3 +1,5 @@
+let wateroffset = 0
+let wateroffsety = 0
 let yoffset = 0
 let y = 0
 let plants = 0
@@ -12,12 +14,18 @@ function placetree(x: number, y: number) {
 }
 
 function ores(x: number, y: number, block: number) {
+    
     if (block == 1) {
         shapes.circle(IRON_ORE, world(x, y - randint(5, 9), 0), randint(1, 3), Axis.Z, ShapeOperation.Replace)
     } else if (block == 2) {
         shapes.circle(COAL_ORE, world(x, y - randint(5, 9), 0), randint(1, 4), Axis.Z, ShapeOperation.Replace)
-    } else {
+    } else if (block == 3) {
         shapes.circle(DIAMOND_ORE, world(x, y - randint(5, 9), 0), randint(1, 2), Axis.Z, ShapeOperation.Replace)
+    } else if (block == 4) {
+        wateroffset = randint(2, 5)
+        wateroffsety = randint(2, 5)
+        shapes.circle(AIR, world(x, y - wateroffsety, 0), wateroffset, Axis.Z, ShapeOperation.Replace)
+        shapes.line(WATER, world(x - wateroffset, y - wateroffsety, 0), world(x + wateroffset, y - wateroffsety, 0))
     }
     
 }
@@ -47,6 +55,8 @@ player.onChat("run", function on_on_chat() {
             ores(x - 5, y, 2)
         } else if (plants == 8) {
             ores(x - 5, y - 5, 3)
+        } else if (plants == 9) {
+            ores(x - 5, y - 5, 4)
         }
         
     }
@@ -60,7 +70,7 @@ loops.forever(function on_forever() {
         shapes.line(LIGHT_BLUE_CONCRETE, world(0, y2, -1), world(100, y2, -1))
     }
     for (let index = 0; index < 10; index++) {
-        mobs.spawn(PIG, pos(0, 0, 0))
+        mobs.spawn(PIG, positions.groundPosition(world(randint(0, 99), 100, 0)))
     }
     loops.pause(60000)
     shapes.line(YELLOW_TERRACOTTA, world(-1, y, 1), world(-1, 0, 1))
@@ -77,8 +87,8 @@ loops.forever(function on_forever() {
         shapes.line(BLACK_CONCRETE, world(0, y4, 1), world(100, y4, 1))
         shapes.line(BLACK_CONCRETE, world(0, y4, -1), world(100, y4, -1))
     }
-    for (let index2 = 0; index2 < 10; index2++) {
-        mobs.spawn(mobs.monster(ZOMBIE), pos(0, 2, 0))
+    for (let index2 = 0; index2 < 20; index2++) {
+        mobs.spawn(mobs.monster(ZOMBIE), positions.groundPosition(world(randint(0, 99), 100, 0)))
     }
     loops.pause(60000)
 })
@@ -92,4 +102,7 @@ blocks.onBlockPlaced(OAK_SAPLING, function on_block_placed_oak_sapling() {
     playery = player.position().getValue(Axis.Y)
     playerx = player.position().getValue(Axis.X)
     placetree(playerx, playery)
+})
+mobs.onMobKilled(PIG, function on_mob_killed_pig() {
+    mobs.spawn(PIG, positions.groundPosition(world(randint(0, 99), 100, 0)))
 })
