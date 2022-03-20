@@ -1,3 +1,5 @@
+wateroffset = 0
+wateroffsety = 0
 yoffset = 0
 y = 0
 plants = 0
@@ -16,6 +18,7 @@ def placetree(x: number, y: number):
         ShapeOperation.REPLACE)
     shapes.line(LOG_OAK, world(x, y + 5, 0), world(x, y, 0))
 def ores(x: number, y: number, block: number):
+    global wateroffset, wateroffsety
     if block == 1:
         shapes.circle(IRON_ORE,
             world(x, y - randint(5, 9), 0),
@@ -28,12 +31,23 @@ def ores(x: number, y: number, block: number):
             randint(1, 4),
             Axis.Z,
             ShapeOperation.REPLACE)
-    else:
+    elif block == 3:
         shapes.circle(DIAMOND_ORE,
             world(x, y - randint(5, 9), 0),
             randint(1, 2),
             Axis.Z,
             ShapeOperation.REPLACE)
+    elif block == 4:
+        wateroffset = randint(2, 5)
+        wateroffsety = randint(2, 5)
+        shapes.circle(AIR,
+            world(x, y - wateroffsety, 0),
+            wateroffset,
+            Axis.Z,
+            ShapeOperation.REPLACE)
+        shapes.line(WATER,
+            world(x - wateroffset, y - wateroffsety, 0),
+            world(x + wateroffset, y - wateroffsety, 0))
 
 def on_on_chat():
     global yoffset, y, plants
@@ -57,6 +71,8 @@ def on_on_chat():
             ores(x - 5, y, 2)
         elif plants == 8:
             ores(x - 5, y - 5, 3)
+        elif plants == 9:
+            ores(x - 5, y - 5, 4)
 player.on_chat("run", on_on_chat)
 
 def on_forever():
@@ -69,7 +85,8 @@ def on_forever():
         shapes.line(LIGHT_BLUE_CONCRETE, world(0, y2, 1), world(100, y2, 1))
         shapes.line(LIGHT_BLUE_CONCRETE, world(0, y2, -1), world(100, y2, -1))
     for index in range(10):
-        mobs.spawn(PIG, pos(0, 0, 0))
+        mobs.spawn(PIG,
+            positions.ground_position(world(randint(0, 99), 100, 0)))
     loops.pause(60000)
     shapes.line(YELLOW_TERRACOTTA, world(-1, y, 1), world(-1, 0, 1))
     shapes.line(YELLOW_TERRACOTTA, world(101, 100, 1), world(101, 0, 1))
@@ -83,8 +100,9 @@ def on_forever():
     for y4 in range(101):
         shapes.line(BLACK_CONCRETE, world(0, y4, 1), world(100, y4, 1))
         shapes.line(BLACK_CONCRETE, world(0, y4, -1), world(100, y4, -1))
-    for index2 in range(10):
-        mobs.spawn(mobs.monster(ZOMBIE), pos(0, 2, 0))
+    for index2 in range(20):
+        mobs.spawn(mobs.monster(ZOMBIE),
+            positions.ground_position(world(randint(0, 99), 100, 0)))
     loops.pause(60000)
 loops.forever(on_forever)
 
@@ -99,3 +117,8 @@ def on_block_placed_oak_sapling():
     playerx = player.position().get_value(Axis.X)
     placetree(playerx, playery)
 blocks.on_block_placed(OAK_SAPLING, on_block_placed_oak_sapling)
+
+def on_mob_killed_pig():
+    mobs.spawn(PIG,
+        positions.ground_position(world(randint(0, 99), 100, 0)))
+mobs.on_mob_killed(PIG, on_mob_killed_pig)
